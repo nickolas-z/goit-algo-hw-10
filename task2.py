@@ -3,15 +3,25 @@ import matplotlib.pyplot as plt
 from scipy.integrate import quad
 
 # Визначення функції
-def f(x):
+def f(x)->float:
+    """
+    Функція, яку потрібно інтегрувати
+    Args:
+        x (float): значення аргументу
+    Returns:
+        float: значення функції в точці x
+    """
     return x**2
 
-# Параметри інтегрування
-a, b = 0, 2  # межі інтегрування
-n_points = 100000  # кількість точок для методу Монте-Карло
-
-# Метод Монте-Карло
-def monte_carlo_integration(f, a, b, n):
+def monte_carlo_integration(f, a, b, n)->float:
+    """Метод Монте-Карло для обчислення інтегралу
+    Args:
+        f (function): функція, яку потрібно інтегрувати
+        a, b (float): межі інтегрування
+        n (int): кількість точок
+    Returns:
+        float: обчислена площа під кривою
+    """
     # Генеруємо випадкові точки
     x = np.random.uniform(a, b, n)
     y = np.random.uniform(0, f(b), n)
@@ -24,6 +34,14 @@ def monte_carlo_integration(f, a, b, n):
     return area
 
 def main():
+    """Головна функція"""
+    
+    # Параметри інтегрування
+    # межі
+    a, b = 0, 2
+    # кількість точок для методу Монте-Карло
+    n_points = 100000
+
     # Виконання обчислень
     monte_carlo_result = monte_carlo_integration(f, a, b, n_points)
     analytical_result, error = quad(f, a, b)
@@ -32,11 +50,11 @@ def main():
 
     # Графік 1: Функція та точки Монте-Карло
     plt.subplot(1, 2, 1)
-    x_plot = np.linspace(a, b, 1000)
+    x_plot = np.linspace(a, b, n_points)
     y_plot = f(x_plot)
 
     # Генеруємо точки для візуалізації
-    n_vis = 1000
+    n_vis = n_points//100
     x_points = np.random.uniform(a, b, n_vis)
     y_points = np.random.uniform(0, f(b), n_vis)
     under_curve = y_points <= f(x_points)
@@ -90,7 +108,6 @@ def main():
     plt.tight_layout()
     plt.savefig("monte_carlo_integration.png")
     plt.show()
-
 
     print(f"Результат методу Монте-Карло (n = {n_points}): {monte_carlo_result:.6f}")
     print(f"Аналітичний результат: {analytical_result:.6f}")

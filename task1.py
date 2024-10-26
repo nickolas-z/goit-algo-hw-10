@@ -1,6 +1,7 @@
 from pulp import *
 
 def main():
+    """Головна функція"""
     # Створюємо модель
     model = LpProblem("Оптимізація_виробництва_напоїв", LpMaximize)
 
