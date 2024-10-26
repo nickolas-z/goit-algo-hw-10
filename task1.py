@@ -1,53 +1,38 @@
-import heapq
-
-def display_heap(cables)->None:
-    """ Вивести поточний стан купи """
-    print(f"Поточна купа: {cables}")
-
-def minimize_cable_cost(cables)->tuple:
-    """ Знайти мінімальні витрати на з'єднання кабелів """
-    # Перевірка, чи потрібно взагалі з'єднувати кабелі
-    if len(cables) < 2:
-        return 0, []
-    
-    # Зберігаємо початкову загальну довжину
-    total_length = sum(cables)
-
-    # Створюємо мінімальну купу з довжин кабелів
-    heapq.heapify(cables)
-    display_heap(cables)
-    
-    total_cost = 0
-    connections = []
-
-    # Поки у нас є більше ніж один кабель у купі
-    while len(cables) > 1:
-        # Витягуємо два найкоротших кабеля
-        first = heapq.heappop(cables)
-        second = heapq.heappop(cables)
-        
-        # З'єднуємо їх
-        cost = first + second
-        total_cost += cost
-        
-        # Додаємо з'єднаний кабель назад до купи
-        heapq.heappush(cables, cost)
-
-        # Зберігаємо з'єднання для виведення
-        connections.append((first, second))
-        display_heap(cables)
-    
-    return total_cost, connections, total_length
+from pulp import *
 
 def main():
-    cable_lengths = [4, 3, 2, 6]
+    # Створюємо модель
+    model = LpProblem("Оптимізація_виробництва_напоїв", LpMaximize)
 
-    total_cost, connections, total_length = minimize_cable_cost(cable_lengths)
-    print("\nПорядок з'єднання кабелів:")
-    for i, (first, second) in enumerate(connections, 1):
-        print(f"{i}. З'єднати кабелі довжиною {first} та {second}")
-    print(f"\nЗагальна довжина кабеля: {total_length}")
-    print(f"Мінімальні загальні витрати на з'єднання: {total_cost}")
+    # Визначаємо кількість лимонаду та фруктового соку
+    lemonade = LpVariable("Лимонад", 0, None, LpInteger)
+    fruit_juice = LpVariable("Фруктовий_сік", 0, None, LpInteger)  
+
+    # Цільова функція - максимізація загальної кількості продуктів
+    model += lemonade + fruit_juice, "Загальна_кількість_продуктів"
+
+    # Обмеження
+    # Вода (2*лимонад + 1*фруктовий_сік <= 100)
+    model += 2 * lemonade + fruit_juice <= 100, "Обмеження_води"
+    # Цукор (1*лимонад <= 50)
+    model += lemonade <= 50, "Обмеження_цукру"
+    # Лимонний сік (1*лимонад <= 30)
+    model += lemonade <= 30, "Обмеження_лимонного_соку"
+    # Фруктове пюре (2*фруктовий_сік <= 40)
+    model += 2 * fruit_juice <= 40, "Обмеження_фруктового_пюре"
+
+    model.solve()
+
+    print("Статус розв'язку:", LpStatus[model.status])
+    print(f"\nОптимальні значення виробництва:")
+    print(f"\tЛимонад: {int(value(lemonade))} одиниць")
+    print(f"\tФруктовий сік: {int(value(fruit_juice))} одиниць")
+    print(f"\nЗагальна кількість продуктів: {int(value(lemonade + fruit_juice))} одиниць")
+
+    print("\nВикористання ресурсів:")
+    print(f"\tВода: {2*value(lemonade) + value(fruit_juice)}/100 одиниць")
+    print(f"\tЛимонний сік: {value(lemonade)}/30 одиниць")
+    print(f"\tФруктове пюре: {2*value(fruit_juice)}/40 одиниць")
 
 if __name__ == "__main__":
     main()
