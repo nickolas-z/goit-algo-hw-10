@@ -1,4 +1,4 @@
-from pulp import *
+import pulp
 
 def main():
     """Головна функція"""
